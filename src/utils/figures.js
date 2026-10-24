@@ -1,40 +1,28 @@
 import { mulberry32, shuffle } from "./rng.js";
-
 /**
  * A figure is a plain object that picks one value for each feature.
  *
- * BOLD features are easy to see. SUBTLE ones are small details.
- * To guarantee that no two options ever look alike, every wrong option
- * must differ from the main figure in a DIFFERENT set of BOLD features.
- * SUBTLE features are only added on top as extra variety.
+ * Every feature below is easy to see. To guarantee that no two options ever
+ * look alike, each wrong option differs from the main figure in a DIFFERENT
+ * group of features (1 or 2 of them).
  */
 export const FEATURES = {
-  square: ["black", "white"], // small square fill
-  tri: ["black", "white"], // small triangle fill
-  head: ["cw", "ccw"], // arrow direction
-  headFill: ["black", "white"], // arrow head fill
-  arcs: [1, 2], // one arc or two arcs
-  squarePos: ["tl", "tc"], // square: top-left or top-centre
-  triPos: ["tr", "br"], // triangle: top-right or bottom-right
-  rings: [1, 2], // one or two circles (subtle)
-  inner: ["dot", "diamond"], // mark inside the diamond (subtle)
+  sqTilt: ["tilt", "flat"], // black square: tilted or flat
+  endFill: ["black", "white"], // triangle at the end of the top arc
+  endDir: ["up", "down"], // that triangle: apex up or down
+  sideFill: ["black", "white"], // triangle on the right
+  sideDir: ["R", "L"], // that triangle points right or left
+  leftHead: ["end", "start"], // left arc: arrow at its end or its start
+  rightHead: ["end", "start"], // right arc: arrow at its end or its start
+  diamondPos: ["c", "l", "r", "u", "d"], // diamond: centre / left / right / up / down
+  diamondTilt: [25, 45, 65], // diamond turn in degrees
+  curve: ["r", "d", "l", "u"], // inner curve bulges right / down / left / up
 };
 
-const BOLD = [
-  "square",
-  "tri",
-  "head",
-  "headFill",
-  "arcs",
-  "squarePos",
-  "triPos",
-];
-const SUBTLE = ["rings", "inner"];
 const KEYS = Object.keys(FEATURES);
 export const OPTIONS_PER_QUESTION = 5;
 
-const sigOf = (fig, keys) => keys.map((k) => fig[k]).join("|");
-export const signature = (fig) => sigOf(fig, KEYS);
+export const signature = (fig) => KEYS.map((k) => fig[k]).join("|");
 
 const pick = (list, rng) => list[Math.floor(rng() * list.length)];
 const otherValue = (fig, key, rng) =>
@@ -49,13 +37,13 @@ function randomFigure(rng) {
   return fig;
 }
 
-// n different groups of 1-2 bold features, e.g. ['square'], ['head','tri'] ...
-function pickBoldSets(rng, n) {
+// n different groups of 1-2 features, e.g. ['sqTilt'], ['curve','sideDir'] ...
+function pickChangeSets(rng, n) {
   const sets = [];
   const used = new Set();
   let guard = 0;
   while (sets.length < n && guard++ < 1000) {
-    const keys = shuffle(BOLD, rng)
+    const keys = shuffle(KEYS, rng)
       .slice(0, rng() < 0.6 ? 1 : 2)
       .sort();
     const id = keys.join("+");
@@ -67,28 +55,15 @@ function pickBoldSets(rng, n) {
   return sets;
 }
 
-// True only if all options differ from each other in at least one bold feature.
-function allDistinct(options) {
-  return new Set(options.map((o) => sigOf(o, BOLD))).size === options.length;
-}
-
 function makeQuestion(rng) {
-  let main;
-  let wrong;
-  do {
-    main = randomFigure(rng);
-    wrong = pickBoldSets(rng, OPTIONS_PER_QUESTION - 1).map((keys) => {
-      const fig = { ...main };
-      keys.forEach((k) => {
-        fig[k] = otherValue(main, k, rng);
-      });
-      if (rng() < 0.35) {
-        const k = pick(SUBTLE, rng);
-        fig[k] = otherValue(main, k, rng);
-      }
-      return fig;
+  const main = randomFigure(rng);
+  const wrong = pickChangeSets(rng, OPTIONS_PER_QUESTION - 1).map((keys) => {
+    const fig = { ...main };
+    keys.forEach((k) => {
+      fig[k] = otherValue(main, k, rng);
     });
-  } while (!allDistinct([main, ...wrong]));
+    return fig;
+  });
 
   const answer = Math.floor(rng() * OPTIONS_PER_QUESTION);
   const options = [...wrong];
