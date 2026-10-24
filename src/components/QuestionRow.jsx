@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import Figure from './Figure.jsx';
+import { memo } from "react";
+import Figure from "./Figure.jsx";
 
-const LETTERS = 'ABCDE';
+const LETTERS = "ABCDE";
 
 function QuestionRow({ question, selected, onSelect }) {
   const number = question.id;
@@ -11,9 +11,13 @@ function QuestionRow({ question, selected, onSelect }) {
         <span className="q-no">Q. {number}</span>
         <Figure spec={question.main} />
       </div>
-      <div className="q-options" role="radiogroup" aria-label={`Options for question ${number}`}>
+      <div
+        className="q-options"
+        role="radiogroup"
+        aria-label={`Options for question ${number}`}
+      >
         {question.options.map((option, i) => (
-          <label className="q-opt" key={i}>
+          <div className="q-opt" key={i}>
             <input
               type="radio"
               name={`q${number}`}
@@ -22,7 +26,7 @@ function QuestionRow({ question, selected, onSelect }) {
               aria-label={`Option ${LETTERS[i]}`}
             />
             <Figure spec={option} />
-          </label>
+          </div>
         ))}
       </div>
     </section>
