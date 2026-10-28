@@ -1,6 +1,6 @@
-import { ClockIcon, MarksIcon, QuestionIcon } from './Icons.jsx';
+import { ClockIcon, MarksIcon, QuestionIcon } from "./Icons.jsx";
 
-export default function TestCard({ test, attempted, onOpen }) {
+export default function TestCard({ test, attempted, onOpen, type }) {
   const parts = Math.ceil(test.totalQuestions / test.partSize);
   const maxMarks = (test.totalQuestions * test.marksPerQuestion).toFixed(2);
 
@@ -31,7 +31,7 @@ export default function TestCard({ test, attempted, onOpen }) {
           </div>
         </div>
         <button type="button" className="btn" onClick={() => onOpen(test)}>
-          {attempted ? 'Re-Attempt' : 'Start Now'}
+          {attempted ? "Re-Attempt" : "Start Now"}
         </button>
       </div>
 

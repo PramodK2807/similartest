@@ -1,0 +1,19 @@
+.top-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px 0;
+  background: #f1f5f9;
+  border-bottom: 2px solid #007bff;
+}
+.top-tabs button {
+  border: 0;
+  background: transparent;
+  padding: 10px 22px;
+  font-size: 15px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+}
+.top-tabs button.active {
+  background: #007bff;
+  color: #fff;
+}
